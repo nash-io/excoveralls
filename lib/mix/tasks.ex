@@ -215,4 +215,15 @@ defmodule Mix.Tasks.Coveralls do
       end
     end
   end
+
+  defmodule Overall do
+    @moduledoc """
+    Runs all tests at once, only useful in umbrella projects.
+    """
+    use Mix.Task
+
+    @preferred_cli_env :test
+
+    def run(args), do: Mix.Tasks.Test.run(args ++ ["--cover"])
+  end
 end
