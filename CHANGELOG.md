@@ -1,3 +1,31 @@
+0.10.6
+------
+#### Changes
+- Do not fail due to timeout from poster (#173).
+  - Fixes: Don't fail the build when uploading the report times out (#112).
+
+0.10.5
+------
+#### Changes
+- Replace deprecated System.cwd/0 calls with File.cwd/0 (#170).
+
+0.10.4
+------
+#### Enhancements
+- Apply GZIP the JSON for coveralls and loosen the timeout (#163).
+
+0.10.3
+------
+#### Changes
+- Make sure analyze_sub_apps gets called (#160, #164).
+
+0.10.2
+------
+#### Changes
+- Argument passing for post task (#158).
+    - Fixes coveralls.post doesn't recognize mix test options (#156).
+- Color for case with 0 relevant lines (#159).
+
 0.10.1
 ------
 #### Enhancements
