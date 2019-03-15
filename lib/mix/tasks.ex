@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Coveralls do
   end
 
   def run(args) do
-    {options, _, _} = OptionParser.parse(args, aliases: [h: :help])
+    {options, _, _} = OptionParser.parse(args, switches: [help: :boolean], aliases: [h: :help])
 
     if options[:help] do
       ExCoveralls.Task.Util.print_help_message
@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Coveralls do
   end
 
   defp parse_common_options(args, options) do
-    switches = [filter: :string, umbrella: :boolean, verbose: :boolean, pro: :boolean, parallel: :boolean]
+    switches = [filter: :string, umbrella: :boolean, verbose: :boolean, pro: :boolean, parallel: :boolean, sort: :string]
     aliases = [f: :filter, u: :umbrella, v: :verbose]
     {common_options, _remaining, _invalid} = OptionParser.parse(args, switches: switches, aliases: aliases)
 
@@ -167,6 +167,20 @@ defmodule Mix.Tasks.Coveralls do
 
     def run(args) do
       Mix.Tasks.Coveralls.do_run(args, [type: "semaphore"])
+    end
+  end
+
+  defmodule Drone do
+    @moduledoc """
+    Provides an entry point for DroneCI's script.
+    """
+
+    use Mix.Task
+
+    @preferred_cli_env :test
+
+    def run(args) do
+      Mix.Tasks.Coveralls.do_run(args, [type: "drone"])
     end
   end
 

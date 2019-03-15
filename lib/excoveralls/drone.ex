@@ -1,6 +1,6 @@
-defmodule ExCoveralls.Semaphore do
+defmodule ExCoveralls.Drone do
   @moduledoc """
-  Handles semaphore-ci integration with coveralls.
+  Handles drone-ci integration with coveralls.
   """
   alias ExCoveralls.Poster
 
@@ -16,7 +16,7 @@ defmodule ExCoveralls.Semaphore do
   def generate_json(stats, options) do
     Jason.encode!(%{
       repo_token: get_repo_token(),
-      service_name: "semaphore",
+      service_name: "drone",
       service_number: get_build_num(),
       service_job_id: get_build_num(),
       service_pull_request: get_pull_request(),
@@ -28,7 +28,8 @@ defmodule ExCoveralls.Semaphore do
 
   defp generate_git_info do
     %{head: %{
-       message: get_message!(),
+       committer_name: get_committer(),
+       message: get_message(),
        id: get_sha()
       },
       branch: get_branch()
@@ -36,29 +37,27 @@ defmodule ExCoveralls.Semaphore do
   end
 
   defp get_pull_request do
-    case Regex.run(~r/(\d+)$/, System.get_env("PULL_REQUEST_NUMBER") || "") do
-      [_, id] -> id
-      _ -> nil
-    end
+    System.get_env("DRONE_PULL_REQUEST")
   end
 
-  defp get_message! do
-    case System.cmd("git", ["log", "-1", "--pretty=format:%s"]) do
-      {message, _} -> message
-      _ -> "[no commit message]"
-    end
+  defp get_message do
+    System.get_env("DRONE_COMMIT_MESSAGE")
+  end
+
+  defp get_committer do
+    System.get_env("DRONE_COMMIT_AUTHOR")
   end
 
   defp get_sha do
-    System.get_env("REVISION")
+    System.get_env("DRONE_COMMIT_SHA")
   end
 
   defp get_branch do
-    System.get_env("BRANCH_NAME")
+    System.get_env("DRONE_BRANCH")
   end
 
   defp get_build_num do
-    System.get_env("SEMAPHORE_BUILD_NUMBER")
+    System.get_env("DRONE_BUILD_NUMBER")
   end
 
   defp get_repo_token do

@@ -4,9 +4,10 @@ defmodule ExCoveralls.Settings do
   """
 
   defmodule Files do
-    @file_name "coveralls.json"
-    def default_file, do: "#{Path.dirname(__ENV__.file)}/../conf/#{@file_name}"
-    def custom_file,  do: "#{System.cwd}/#{@file_name}"
+    @filename "coveralls.json"
+    def default_file, do: "#{Path.dirname(__ENV__.file)}/../conf/#{@filename}"
+    def custom_file, do: Application.get_env(:excoveralls, :config_file, "#{System.cwd}/#{@filename}")
+    def dot_file, do: Path.expand("~/.excoveralls/#{@filename}")
   end
 
   @doc """
@@ -59,8 +60,8 @@ defmodule ExCoveralls.Settings do
 
   defp read_config_file(file_name) do
     if File.exists?(file_name) do
-      case File.read!(file_name) |> JSX.decode do
-        {:ok, config} -> Enum.into(config, Map.new)
+      case File.read!(file_name) |> Jason.decode do
+        {:ok, config} -> config
         _ -> raise "Failed to parse config file as JSON : #{file_name}"
       end
     else
@@ -76,14 +77,37 @@ defmodule ExCoveralls.Settings do
     |> Enum.map(&Regex.compile!/1)
   end
 
+  def get_print_summary do
+    read_config("print_summary", true)
+  end
+
   @doc """
   Reads the value for the specified key defined in the json file.
   """
   def read_config(key, default \\ nil) do
-    case (read_config_file(Files.custom_file) |> Map.get(key)) do
-      nil    -> read_config_file(Files.default_file) |> Map.get(key, default)
+    case (read_merged_config(Files.dot_file, Files.custom_file) |> Map.get(key)) do
+      nil    -> read_config_file(Files.default_file()) |> Map.get(key, default)
       config -> config
     end
   end
-end
 
+  defp read_merged_config(dot, custom) do
+    read_config_file(dot)
+    |> merge(read_config_file(custom))
+  end
+
+  defp merge(left, right) when is_map(left) and is_map(right) do
+    keys = Map.keys(left) ++ Map.keys(right)
+    Enum.reduce(keys, %{}, fn k, new_map ->
+      merged = cond do
+        Map.has_key?(left, k) and Map.has_key?(right, k) -> merge(Map.get(left, k), Map.get(right, k))
+        Map.has_key?(left, k) == false and Map.has_key?(right, k) -> Map.get(right, k)
+        Map.has_key?(left, k) and Map.has_key?(right, k) == false -> Map.get(left, k)
+        true -> %{}
+      end
+      Map.put(new_map, k, merged)
+    end)
+  end
+  defp merge(left, right) when is_list(left) and is_list(right), do: Enum.uniq(left ++ right)
+  defp merge(_left, right), do: right
+end

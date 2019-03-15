@@ -10,10 +10,10 @@ defmodule ExCoveralls.JsonTest do
 
   @content     "defmodule Test do\n  def test do\n  end\nend\n"
   @counts      [0, 1, nil, nil]
-  @source_info [[name: "test/fixtures/test.ex",
-                 source: @content,
-                 coverage: @counts
-               ]]
+  @source_info [%{name: "test/fixtures/test.ex",
+                  source: @content,
+                  coverage: @counts
+               }]
 
   @stats_result "" <>
     "----------------\n" <>
@@ -39,16 +39,15 @@ defmodule ExCoveralls.JsonTest do
   end
 
   test_with_mock "generate json file", %{report: report}, ExCoveralls.Settings, [],
-    [get_coverage_options: fn -> %{"output_dir" => @test_output_dir} end, get_file_col_width: fn -> 40 end] do
+    [get_coverage_options: fn -> %{"output_dir" => @test_output_dir} end, get_file_col_width: fn -> 40 end, get_print_summary: fn -> true end] do
 
     assert capture_io(fn ->
       Json.execute(@source_info)
     end) =~ @stats_result
 
-    assert(File.read!(report) =~ ~s({"source_files":[{"name":"test/fixtures/test.ex","source":"defmodule Test do\\n  def test do\\n  end\\nend\\n","coverage":[0,1,null,null]}]}))
+    assert(File.read!(report) =~ ~s({"source_files":[{"coverage":[0,1,null,null],"name":"test/fixtures/test.ex","source":"defmodule Test do\\n  def test do\\n  end\\nend\\n"}]}))
     %{size: size} = File.stat! report
     assert(size == @file_size)
   end
 
 end
-

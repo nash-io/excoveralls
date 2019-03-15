@@ -1,3 +1,57 @@
+0.10.1
+------
+#### Enhancements
+- Add support for drone CI (#154).
+- Parallel support for separate CircleCI Workflow jobs (#155).
+
+0.10.0
+------
+#### Enhancements
+- Custom config file path, and ability to silence output (#153).
+#### Changes
+- use ~> to pin on minors & test more recent Elixirs (#152).
+
+0.9.2
+------
+#### Changes
+- Add meta tag for utf-8 charset to coverage.html (#144).
+- Fix warnings for elixir v1.7
+    - Pass switches to OptionParser.parse opts (#150).
+
+0.9.1
+------
+#### Changes
+- Fix umbrella stats and make source consistent (#141).
+
+0.9.0
+------
+#### Enhancements
+- Replace JSX with Jason (#137).
+
+#### Changes
+- Make the minimum elixir version v1.3.
+
+0.8.2
+------
+#### Changes
+- Ensure missing source from dirty build dir is not reported (#134).
+
+0.8.1
+------
+#### Changes
+- Bump meck to 0.8.9 (#129).
+    - Fix for Got error while mocking a method using espec (#107).
+
+0.8.0
+------
+#### Enhancements
+* Add --sort option to local runner (#125).
+* Merge dot file settings and project settings (#122).
+
+0.7.5
+------
+#### Enhancements
+* Support for ~/.excoversalls/coveralls.json (#120).
 
 0.7.4
 ------

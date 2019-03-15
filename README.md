@@ -10,6 +10,7 @@ The following are example projects.
   - [semaphore_sample](https://github.com/parroty/semaphore_sample) is for Semaphore CI.
   - [excoveralls_umbrella](https://github.com/parroty/excoveralls_umbrella) is for umbrella project.
   - [gitlab_sample](https://gitlab.com/parroty/gitlab_sample) is for GitLab CI (using GitLab CI feature instead of coveralls.io).
+  - [drone_sample](https://github.com/vorce/drone_sample) is for Drone CI.
 
 # Settings
 ### mix.exs
@@ -37,7 +38,7 @@ end
 
 defp deps do
   [
-    {:excoveralls, "~> 0.7", only: :test}
+    {:excoveralls, "~> 0.10", only: :test},
   ]
 end
 ```
@@ -50,9 +51,11 @@ end
 - [mix coveralls.travis](#mix-coverallstravis-post-coverage-from-travis)
 - [mix coveralls.circle](#mix-coverallscircle-post-coverage-from-circle)
 - [mix coveralls.semaphore](#mix-coverallssemaphore-post-coverage-from-semaphore)
-- [mix coveralls.post](#mix-coverallspost-post-coverage-from-localhost)
+- [mix coveralls.drone](#mix-coverallsdrone-post-coverage-from-drone)
+- [mix coveralls.post](#mix-coverallspost-post-coverage-from-any-host)
 - [mix coveralls.detail](#mix-coverallsdetail-show-coverage-with-detail)
 - [mix coveralls.html](#mix-coverallshtml-show-coverage-as-html-report)
+- [mix coveralls.json](#mix-coverallsjson-show-coverage-as-json-report)
 
 ### [mix coveralls] Show coverage
 Run the `MIX_ENV=test mix coveralls` command to show coverage information on localhost.
@@ -161,6 +164,23 @@ mix coveralls.semaphore
 Ensure your coveralls.io repo token is available via the `COVERALLS_REPO_TOKEN` environment
 variable.
 
+### [mix coveralls.drone] Post coverage from drone
+Specify `mix coveralls.drone` in the `.drone.yml`.
+This task is for submitting the result to the coveralls server when the Drone build is executed.
+
+You will also need to add your coveralls repo token as a secret to the drone project:
+`drone secret add --repository=your-namespace/your-project --name=coveralls_repo_token --value=xyz`
+
+#### .drone.yml
+
+```yml
+pipeline:
+  build:
+    secrets: [ coveralls_repo_token ]
+    commands:
+      - mix coveralls.drone
+```
+
 ### [mix coveralls.post] Post coverage from any host
 Acquire the repository token of coveralls.io in advance, and run the `mix coveralls.post` command.
 It is for submitting the result to coveralls server from any host.
@@ -232,6 +252,16 @@ $ MIX_ENV=test mix coveralls.html
 Output reports are written to `cover/excoveralls.html` by default, however, the path can be specified by overwriting the `"output_dir"` coverage option.
 Custom reports can be created and utilized by defining `template_path` in `coveralls.json`. This directory should
 contain an eex template named `coverage.html.eex`.
+
+### [mix coveralls.json] Show coverage as JSON report
+This task displays coverage information at the source-code level formatted as a JSON document.
+The report follows a format supported by several code coverage services, including Codecov and Code Climate.
+Output to the shell is the same as running the command `mix coveralls`. In a similar manner to `mix coveralls.detail`, reported source code can be filtered by specifying arguments using the `--filter` flag.
+
+Upload a coverage report to Codecov using their [bash uploader](https://docs.codecov.io/docs/about-the-codecov-bash-uploader)
+or to Code Climate using their [test-reporter](https://docs.codeclimate.com/docs/configuring-test-coverage).
+
+Output reports are written to `cover/excoveralls.json` by default, however, the path can be specified by overwriting the `"output_dir"` coverage option.
 
 ## coveralls.json
 `coveralls.json` provides settings for excoveralls.

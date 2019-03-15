@@ -13,24 +13,24 @@ defmodule ExCoveralls.StatsTest do
   @module_hash     Enum.into([{"test/fixtures/test.ex", @count_hash}], Map.new)
   @counts          [0, 1, nil, nil]
   @coverage        [{"test/fixtures/test.ex", @counts}]
-  @source_info     [[name: "test/fixtures/test.ex",
+  @source_info     [%{name: "test/fixtures/test.ex",
                      source: @trimmed,
                      coverage: @counts
-                   ]]
+                   }]
   @fixture_default Path.dirname(__ENV__.file) <> "/fixtures/default.json"
   @fixture_custom  Path.dirname(__ENV__.file) <> "/fixtures/skip_files.json"
 
   @invalid_counts [0, 1, nil, "invalid"]
-  @invalid_source_info [[name: "test/fixtures/test.ex",
+  @invalid_source_info [%{name: "test/fixtures/test.ex",
                  source: @content,
                  coverage: @invalid_counts
-               ]]
+               }]
 
   @empty_counts [nil, nil, nil, nil]
-  @empty_source_info [[name: "test/fixtures/test.ex",
+  @empty_source_info [%{name: "test/fixtures/test.ex",
                  source: @content,
                  coverage: @empty_counts
-               ]]
+               }]
 
   @source_result %{
     coverage: 50,
@@ -92,7 +92,8 @@ defmodule ExCoveralls.StatsTest do
 
   test_with_mock "skip files", Settings.Files,
                    [default_file: fn -> @fixture_default end,
-                    custom_file:  fn -> @fixture_custom end] do
+                    custom_file:  fn -> @fixture_custom end,
+                    dot_file:  fn -> "__invalid__" end] do
     assert Stats.skip_files(@source_info) == []
   end
 

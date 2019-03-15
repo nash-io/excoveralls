@@ -5,16 +5,16 @@ defmodule ExCoveralls.HtmlTest do
   alias ExCoveralls.Html
 
   @file_name "excoveralls.html"
-  @file_size 20155
+  @file_size 20184
   @test_output_dir "cover_test/"
   @test_template_path "lib/templates/html/htmlcov/"
 
   @content     "defmodule Test do\n  def test do\n  end\nend\n"
   @counts      [0, 1, nil, nil]
-  @source_info [[name: "test/fixtures/test.ex",
+  @source_info [%{name: "test/fixtures/test.ex",
                  source: @content,
                  coverage: @counts
-               ]]
+               }]
 
   @stats_result "" <>
     "----------------\n" <>
@@ -40,7 +40,7 @@ defmodule ExCoveralls.HtmlTest do
   end
 
   test_with_mock "generate stats information", %{report: report}, ExCoveralls.Settings, [],
-    [get_coverage_options: fn -> %{"output_dir" => @test_output_dir, "template_path" => @test_template_path} end, get_file_col_width: fn -> 40 end] do
+  [get_coverage_options: fn -> %{"output_dir" => @test_output_dir, "template_path" => @test_template_path} end, get_file_col_width: fn -> 40 end, get_print_summary: fn -> true end] do
 
     assert capture_io(fn ->
       Html.execute(@source_info)
@@ -52,7 +52,7 @@ defmodule ExCoveralls.HtmlTest do
   end
 
   test_with_mock "Exit status code is 1 when actual coverage does not reach the minimum",
-    ExCoveralls.Settings, [get_coverage_options: fn -> coverage_options(100) end, get_file_col_width: fn -> 40 end] do
+    ExCoveralls.Settings, [get_coverage_options: fn -> coverage_options(100) end, get_file_col_width: fn -> 40 end, get_print_summary: fn -> true end] do
     output = capture_io(fn ->
       assert catch_exit(Html.execute(@source_info)) == {:shutdown, 1}
     end)
@@ -60,7 +60,7 @@ defmodule ExCoveralls.HtmlTest do
   end
 
   test_with_mock "Exit status code is 0 when actual coverage reaches the minimum",
-    ExCoveralls.Settings, [get_coverage_options: fn -> coverage_options(49.9) end, get_file_col_width: fn -> 40 end] do
+    ExCoveralls.Settings, [get_coverage_options: fn -> coverage_options(49.9) end, get_file_col_width: fn -> 40 end, get_print_summary: fn -> true end] do
     assert capture_io(fn ->
       Html.execute(@source_info)
     end) =~ @stats_result
@@ -75,4 +75,3 @@ defmodule ExCoveralls.HtmlTest do
   end
 
 end
-

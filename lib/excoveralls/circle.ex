@@ -7,33 +7,33 @@ defmodule ExCoveralls.Circle do
   def execute(stats, options) do
     json = generate_json(stats, Enum.into(options, %{}))
     if options[:verbose] do
-      IO.puts JSX.prettify!(json)
+      IO.puts json
     end
     Poster.execute(json)
   end
 
   def generate_json(stats, options \\ %{})
   def generate_json(stats, options) do
-    JSX.encode!([
+    Jason.encode!(%{
       repo_token: get_repo_token(),
       service_name: "circle-ci",
-      service_number: get_build_num(),
-      service_job_id: get_build_num(),
+      service_number: get_number(),
+      service_job_id: get_job_id(),
       service_pull_request: get_pull_request(),
       source_files: stats,
       git: generate_git_info(),
       parallel: options[:parallel]
-    ])
+    })
   end
 
   defp generate_git_info do
-    [head: [
+    %{head: %{
        committer_name: get_committer(),
        message: get_message!(),
        id: get_sha()
-      ],
+      },
       branch: get_branch()
-    ]
+    }
   end
 
   defp get_pull_request do
@@ -62,8 +62,16 @@ defmodule ExCoveralls.Circle do
     System.get_env("CIRCLE_BRANCH")
   end
 
-  defp get_build_num do
+  defp get_job_id do
+    # When using workflows, each job has a separate `CIRCLE_BUILD_NUM`, so this needs to be used as the Job ID and not
+    # the Job Number.
     System.get_env("CIRCLE_BUILD_NUM")
+  end
+
+  defp get_number do
+    # `CIRCLE_WORKFLOW_WORKSPACE_ID` is the same when "Rerun failed job" is done while `CIRCLE_WORKFLOW_ID` changes, so
+    # use `CIRCLE_WORKFLOW_WORKSPACE_ID` so that the results from the original and rerun are combined
+    System.get_env("CIRCLE_WORKFLOW_WORKSPACE_ID") || System.get_env("CIRCLE_BUILD_NUM")
   end
 
   defp get_repo_token do
