@@ -242,6 +242,6 @@ defmodule Mix.Tasks.Coveralls do
 
     @preferred_cli_env :test
 
-    def run(args), do: Mix.Tasks.Test.run(args ++ ["--cover"], [type: "json"])
+    def run(args), do: Mix.Tasks.Test.run(args ++ ["--cover"])
   end
 end

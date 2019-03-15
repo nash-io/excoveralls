@@ -50,7 +50,7 @@ defmodule ExCoveralls do
     if options[:umbrella] do
       store_stats(stats, options, compile_path)
     else
-      analyze(stats, options[:type] || "local", options)
+      analyze(stats, options[:type] || "json", options)
     end
   end
 
